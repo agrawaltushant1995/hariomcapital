@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Market Challenge Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .game-info {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .player-list {
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        .player-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sector-list {
+            display: flex;
+            justify-content: space-around;
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        .sector-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            margin: 0 5px;
+        }
+        .sector-item.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .stock-list {
+            width: 80%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        .stock-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stock-item button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .stock-item button.sell {
+            background-color: #dc3545;
+        }
+        .stock-item button:disabled {
+            background-color: #ccc;
+        }
+        .balance {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .price-change {
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        .price-up {
+            color: green;
+        }
+        .price-down {
+            color: red;
+        }
+        .winner {
+            color: green;
+            font-weight: bold;
+        }
+        .hidden {
+            display: none;
+        }
+        .entry-form {
+            margin-top: 20px;
+        }
+        .entry-form input {
+            padding: 10px;
+            margin: 5px 0;
+            width: 80%;
+            max-width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .entry-form button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .entry-form button:disabled {
+            background-color: #ccc;
+        }
+        .time-options {
+            margin-top: 10px;
+        }
+        .time-options button {
+            padding: 5px 10px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .time-options button.selected {
+            background-color: #28a745;
+        }
+        .owned-stocks {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+        }
+        .owned-stock {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .exit-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .winner-history {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .winner-history h3 {
+            margin: 0 0 10px;
+        }
+        .winner-history ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .winner-history li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Stock Market Challenge Game</h1>
+        <button class="exit-button" id="exitButton">Exit Game</button>
+    </header>
+    <div class="container">
+        <div id="entryScreen" class="game-info">
+            <p>Welcome to the Stock Market Challenge!</p>
+            <p>Entry Fee: ₹<s>49</s> ₹0 (Beta Trial)</p>
+            <div class="entry-form">
+                <input type="text" id="playerNameInput" placeholder="Enter your name">
+                <div class="time-options">
+                    <button class="time-option" data-time="60">1 Minute</button>
+                    <button class="time-option" data-time="120">2 Minutes</button>
+                    <button class="time-option" data-time="300">5 Minutes</button>
+                    <button class="time-option selected" data-time="600">10 Minutes</button>
+                </div>
+                <button id="joinGameButton" disabled>Join Game</button>
+            </div>
+            <div class="winner-history">
+                <h3>Winner History</h3>
+                <ul id="winnerHistory"></ul>
+            </div>
+        </div>
+        <div id="gameScreen" class="hidden">
+            <div class="game-info">
+                <p>Time Left: <span id="timer">10:00</span></p>
+            </div>
+            <div class="balance">Your Balance: ₹<span id="balance">100000</span></div>
+            <div class="player-list" id="playerList"></div>
+            <div class="sector-list" id="sectorList"></div>
+            <div class="stock-list" id="stockList"></div>
+            <div class="owned-stocks" id="ownedStocks"></div>
+            <div id="result" style="display: none; margin-top: 20px;"></div>
+        </div>
+    </div>
+    <footer>
+        Disclaimer: This is a virtual stock market game. No real money is involved.
+    </footer>
+
+    <script>
+        const sectors = [
+            { name: "Technology", stocks: [] },
+            { name: "Healthcare", stocks: [] },
+            { name: "Finance", stocks: [] },
+            { name: "Energy", stocks: [] },
+            { name: "Consumer Goods", stocks: [] }
+        ];
+
+        const players = [];
+        let currentPlayerIndex = -1;
+        let timeLeft = 600; // Default: 10 minutes in seconds
+        let gameInterval;
+        let activeSector = null;
+        const winnerHistory = [];
+
+        const entryScreenElement = document.getElementById("entryScreen");
+        const gameScreenElement = document.getElementById("gameScreen");
+        const playerNameInput = document.getElementById("playerNameInput");
+        const joinGameButton = document.getElementById("joinGameButton");
+        const sectorListElement = document.getElementById("sectorList");
+        const stockListElement = document.getElementById("stockList");
+        const balanceElement = document.getElementById("balance");
+        const timerElement = document.getElementById("timer");
+        const resultElement = document.getElementById("result");
+        const ownedStocksElement = document.getElementById("ownedStocks");
+        const exitButton = document.getElementById("exitButton");
+        const playerListElement = document.getElementById("playerList");
+        const winnerHistoryElement = document.getElementById("winnerHistory");
+
+        playerNameInput.addEventListener("input", () => {
+            joinGameButton.disabled = playerNameInput.value.trim() === "";
+        });
+
+        function generateStocks() {
+            sectors.forEach(sector => {
+                for (let i = 1; i <= 10; i++) {
+                    sector.stocks.push({
+                        name: `${sector.name} Stock ${i}`,
+                        price: Math.floor(Math.random() * 500) + 50,
+                        volatility: Math.random() * 0.05 + 0.01
+                    });
+                }
+            });
+        }
+
+        function renderSectors() {
+            sectorListElement.innerHTML = "";
+            sectors.forEach(sector => {
+                const sectorItem = document.createElement("div");
+                sectorItem.className = "sector-item";
+                if (activeSector && activeSector.name === sector.name) {
+                    sectorItem.classList.add("active");
+                }
+                sectorItem.textContent = sector.name;
+                sectorItem.onclick = () => setActiveSector(sector);
+                sectorListElement.appendChild(sectorItem);
+            });
+        }
+
+        function setActiveSector(sector) {
+            activeSector = sector;
+            renderSectors();
+            renderStocks(activeSector);
+        }
+
+        function renderStocks(sector) {
+            stockListElement.innerHTML = "";
+            sector.stocks.forEach(stock => {
+                const stockItem = document.createElement("div");
+                stockItem.className = "stock-item";
+
+                const stockDetails = document.createElement("div");
+                stockDetails.textContent = `${stock.name} - ₹${stock.price.toFixed(2)}`;
+
+                const priceChange = document.createElement("span");
+                priceChange.className = "price-change";
+                if (stock.change > 0) {
+                    priceChange.className += " price-up";
+                    priceChange.textContent = `▲ ${stock.change.toFixed(2)}`;
+                } else if (stock.change < 0) {
+                    priceChange.className += " price-down";
+                    priceChange.textContent = `▼ ${Math.abs(stock.change).toFixed(2)}`;
+                }
+
+                const buyButton = document.createElement("button");
+                buyButton.textContent = "Buy";
+                buyButton.onclick = () => buyStock(stock);
+
+                const sellButton = document.createElement("button");
+                sellButton.textContent = "Sell";
+                sellButton.className = "sell";
+                sellButton.onclick = () => sellStock(stock);
+
+                if (players[currentPlayerIndex].balance < stock.price) {
+                    buyButton.disabled = true;
+                }
+
+                const currentPlayer = players[currentPlayerIndex];
+                const ownedStock = currentPlayer.stocks.find(s => s.name === stock.name);
+                if (!ownedStock || ownedStock.quantity <= 0) {
+                    sellButton.disabled = true;
+                }
+
+                stockItem.appendChild(stockDetails);
+                stockItem.appendChild(priceChange);
+                stockItem.appendChild(buyButton);
+                stockItem.appendChild(sellButton);
+                stockListElement.appendChild(stockItem);
+            });
+        }
+
+        function renderOwnedStocks() {
+            ownedStocksElement.innerHTML = "";
+            const currentPlayer = players[currentPlayerIndex];
+            currentPlayer.stocks.forEach(stock => {
+                if (stock.quantity > 0) {
+                    const ownedStockItem = document.createElement("div");
+                    ownedStockItem.className = "owned-stock";
+                    ownedStockItem.textContent = `${stock.name} - Quantity: ${stock.quantity} | Total Value: ₹${(stock.quantity * stock.price).toFixed(2)}`;
+                    ownedStocksElement.appendChild(ownedStockItem);
+                }
+            });
+        }
+
+        function renderPlayers() {
+            playerListElement.innerHTML = "";
+            players.forEach(player => {
+                const playerItem = document.createElement("div");
+                playerItem.className = "player-item";
+                playerItem.textContent = `${player.name} - ₹${player.balance.toFixed(2)}`;
+                playerListElement.appendChild(playerItem);
+            });
+        }
+
+        function updateStockPrices() {
+            sectors.forEach(sector => {
+                sector.stocks.forEach(stock => {
+                    const randomFactor = Math.random();
+                    let changePercent;
+                    if (randomFactor < 0.05) {
+                        changePercent = (Math.random() * 0.1) - 0.05; // 5-10% up/down
+                    } else {
+                        changePercent = (Math.random() * 0.05) - 0.025; // 1-5% up/down
+                    }
+                    const changeAmount = stock.price * changePercent;
+                    stock.price += changeAmount;
+                    stock.change = changeAmount;
+
+                    // Update player balances based on stock price changes
+                    players.forEach(player => {
+                        player.stocks.forEach(playerStock => {
+                            if (playerStock.name === stock.name) {
+                                player.balance += changeAmount * playerStock.quantity;
+                            }
+                        });
+                    });
+                });
+            });
+            if (activeSector) {
+                renderStocks(activeSector);
+            }
+            renderOwnedStocks();
+            renderPlayers();
+        }
+
+        function buyStock(stock) {
+            const currentPlayer = players[currentPlayerIndex];
+            const maxQuantity = Math.floor(currentPlayer.balance / stock.price);
+            const quantity = prompt(`How many shares of ${stock.name} do you want to buy? (Max: ${maxQuantity})`);
+            const parsedQuantity = parseInt(quantity);
+            if (parsedQuantity > 0 && parsedQuantity <= maxQuantity) {
+                const totalCost = parsedQuantity * stock.price;
+                currentPlayer.balance -= totalCost;
+                const ownedStock = currentPlayer.stocks.find(s => s.name === stock.name);
+                if (ownedStock) {
+                    ownedStock.quantity += parsedQuantity;
+                } else {
+                    currentPlayer.stocks.push({ name: stock.name, quantity: parsedQuantity, price: stock.price });
+                }
+                renderPlayers();
+                renderOwnedStocks();
+                alert(`You bought ${parsedQuantity} shares of ${stock.name} for ₹${totalCost.toFixed(2)}`);
+            } else {
+                alert("Invalid quantity or insufficient balance!");
+            }
+        }
+
+        function sellStock(stock) {
+            const currentPlayer = players[currentPlayerIndex];
+            const ownedStock = currentPlayer.stocks.find(s => s.name === stock.name);
+            if (ownedStock && ownedStock.quantity > 0) {
+                const quantity = prompt(`How many shares of ${stock.name} do you want to sell? (Max: ${ownedStock.quantity})`);
+                const parsedQuantity = parseInt(quantity);
+                if (parsedQuantity > 0 && parsedQuantity <= ownedStock.quantity) {
+                    const totalEarnings = parsedQuantity * stock.price;
+                    currentPlayer.balance += totalEarnings;
+                    ownedStock.quantity -= parsedQuantity;
+                    renderPlayers();
+                    renderOwnedStocks();
+                    alert(`You sold ${parsedQuantity} shares of ${stock.name} for ₹${totalEarnings.toFixed(2)}`);
+                } else {
+                    alert("Invalid quantity!");
+                }
+            } else {
+                alert("You don't own any shares of this stock!");
+            }
+        }
+
+        function machineAction() {
+            const machinePlayer = players.find(player => player.name === "Machine");
+            const randomSector = sectors[Math.floor(Math.random() * sectors.length)];
+            const randomStock = randomSector.stocks[Math.floor(Math.random() * randomSector.stocks.length)];
+            const action = Math.random() < 0.5 ? "buy" : "sell";
+
+            if (action === "buy") {
+                const maxQuantity = Math.floor(machinePlayer.balance / randomStock.price);
+                const quantity = Math.floor(Math.random() * maxQuantity) + 1;
+                if (quantity > 0 && machinePlayer.balance >= quantity * randomStock.price) {
+                    machinePlayer.balance -= quantity * randomStock.price;
+                    const ownedStock = machinePlayer.stocks.find(s => s.name === randomStock.name);
+                    if (ownedStock) {
+                        ownedStock.quantity += quantity;
+                    } else {
+                        machinePlayer.stocks.push({ name: randomStock.name, quantity: quantity, price: randomStock.price });
+                    }
+                }
+            } else if (action === "sell") {
+                const ownedStock = machinePlayer.stocks.find(s => s.name === randomStock.name);
+                if (ownedStock && ownedStock.quantity > 0) {
+                    const quantity = Math.floor(Math.random() * ownedStock.quantity) + 1;
+                    machinePlayer.balance += quantity * randomStock.price;
+                    ownedStock.quantity -= quantity;
+                }
+            }
+        }
+
+        function startTimer() {
+            gameInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(gameInterval);
+                    endGame();
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function endGame() {
+            const winner = players.reduce((prev, curr) => (prev.balance > curr.balance ? prev : curr));
+            winnerHistory.push(`${winner.name} won with ₹${winner.balance.toFixed(2)}`);
+            updateWinnerHistory();
+            resultElement.style.display = "block";
+            resultElement.innerHTML = `<p class="winner">${winner.name} wins with ₹${winner.balance.toFixed(2)} and takes all the money!</p>`;
+            setTimeout(() => {
+                resetGame();
+            }, 3000);
+        }
+
+        function updateWinnerHistory() {
+            winnerHistoryElement.innerHTML = "<h3>Winner History</h3><ul>";
+            winnerHistory.forEach(winner => {
+                const listItem = document.createElement("li");
+                listItem.textContent = winner;
+                winnerHistoryElement.querySelector("ul").appendChild(listItem);
+            });
+        }
+
+        function resetGame() {
+            players.length = 0;
+            currentPlayerIndex = -1;
+            timeLeft = 600;
+            gameScreenElement.classList.add("hidden");
+            entryScreenElement.classList.remove("hidden");
+            timerElement.textContent = "10:00";
+            resultElement.style.display = "none";
+        }
+
+        function joinGame() {
+            const playerName = playerNameInput.value.trim();
+            if (playerName) {
+                players.push({ name: playerName, balance: 100000, stocks: [] });
+                alert(`${playerName}, you have joined the game!`);
+                playerNameInput.value = "";
+                joinGameButton.disabled = true;
+
+                // Add machine player
+                players.push({ name: "Machine", balance: 100000, stocks: [] });
+                alert("The Machine is ready to play against you!");
+
+                startGame();
+            }
+        }
+
+        function startGame() {
+            currentPlayerIndex = 0;
+            entryScreenElement.classList.add("hidden");
+            gameScreenElement.classList.remove("hidden");
+            generateStocks();
+            renderSectors();
+            renderPlayers();
+            renderOwnedStocks();
+            startTimer();
+            setInterval(updateStockPrices, 5000); // Update prices every 5 seconds
+            setInterval(machineAction, 7000); // Machine performs actions every 7 seconds
+        }
+
+        document.querySelectorAll(".time-option").forEach(button => {
+            button.addEventListener("click", () => {
+                document.querySelector(".time-option.selected").classList.remove("selected");
+                button.classList.add("selected");
+                timeLeft = parseInt(button.getAttribute("data-time"));
+                timerElement.textContent = `${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, "0")}`;
+            });
+        });
+
+        joinGameButton.addEventListener("click", joinGame);
+
+        exitButton.addEventListener("click", () => {
+            const user = players.find(player => player.name !== "Machine");
+            const machine = players.find(player => player.name === "Machine");
+            const winner = user.balance > machine.balance ? user : machine;
+            winnerHistory.push(`${winner.name} won with ₹${winner.balance.toFixed(2)}`);
+            updateWinnerHistory();
+            alert(`You exited the game. ${winner.name} wins with ₹${winner.balance.toFixed(2)}!`);
+            resetGame();
+        });
+    </script>
+</body>
+</html>
